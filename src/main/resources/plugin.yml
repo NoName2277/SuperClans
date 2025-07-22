@@ -1,6 +1,6 @@
 name: SuperClans
 version: 1.0-SNAPSHOT
-main: pl.noname.superclans.SuperTab
+main: pl.noname.superclans.SuperClans
 api-version: 1.16
 depend:
   - Vault

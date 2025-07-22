@@ -17,15 +17,14 @@ import java.util.*;
 
 public class GenerateTabList {
 
-    private final SuperClans tabList;
+    private final SuperClans superClans;
     private final Clan clan;
 
-    public GenerateTabList(SuperClans tabList, Clan clan) {
-        this.tabList = tabList;
+    public GenerateTabList(SuperClans superClans, Clan clan) {
+        this.superClans = superClans;
         this.clan = clan;
     }
 
-    // Mapowanie ID klanu na segment slotów tablisty (każdy segment 20 slotów)
     private int[] getSegmentSlotsById(int id) {
         int start = 0;
         switch (id) {
@@ -35,7 +34,7 @@ public class GenerateTabList {
             case 4: start = 60; break;
             default: start = 0;
         }
-        return new int[] {start, start + 19};  // segment 20 slotów: [start..start+19]
+        return new int[] {start, start + 19};
     }
 
     public void gen(Player p, boolean trueping, String skinvalue, String skinsignature, PacketPlayOutPlayerInfo.EnumPlayerInfoAction type) {
@@ -46,11 +45,10 @@ public class GenerateTabList {
 
         YamlConfiguration yamlFile = YamlConfiguration.loadConfiguration(f);
         List<String> YamlUsers = yamlFile.getStringList("users");
-        if (YamlUsers == null || YamlUsers.isEmpty()) return;
+        if (YamlUsers == null) return;
 
         TablistMenager menager = new TablistMenager();
 
-        // Pobierz wszystkie klany zaczynające się od "tab_"
         Set<String> clanKeys = clan.get().getKeys(false);
         List<String> clans = new ArrayList<>();
         for (String key : clanKeys) {
@@ -58,17 +56,20 @@ public class GenerateTabList {
                 clans.add(key);
             }
         }
-        if (clans.isEmpty()) return;
 
-        // Mapa klan -> lista graczy w tym klanie
+        if (clans.isEmpty()) {
+            for (int slot = 0; slot < 80; slot++) {
+                menager.modifyTablist(p, " ", String.valueOf(slot), 9999, skinvalue, skinsignature, type);
+            }
+            return;
+        }
+
         Map<String, List<PlayerObject>> clanPlayersMap = new HashMap<>();
 
-        // Inicjalizacja list dla każdego klanu
         for (String clanKey : clans) {
             clanPlayersMap.put(clanKey, new ArrayList<>());
         }
 
-        // Przypisanie graczy do ich klanów (teamów)
         for (String playerName : YamlUsers) {
             Player target = Bukkit.getPlayer(playerName);
             if (target != null && target.isOnline()) {
@@ -92,8 +93,8 @@ public class GenerateTabList {
                 int ping = trueping ? ((CraftPlayer) target).getHandle().ping : 9999;
 
                 String nick = "§a" + target.getName();
-                String rawPrefix = tabList.getConfig().getString("tabname-prefix", "");
-                String rawSuffix = tabList.getConfig().getString("tabname-suffix", "");
+                String rawPrefix = superClans.getConfig().getString("tabname-prefix", "");
+                String rawSuffix = superClans.getConfig().getString("tabname-suffix", "");
                 String prefix = PlaceholderAPI.setPlaceholders(target, rawPrefix);
                 String suffix = PlaceholderAPI.setPlaceholders(target, rawSuffix);
                 prefix = ChatColor.translateAlternateColorCodes('&', prefix);
@@ -117,6 +118,7 @@ public class GenerateTabList {
                 idToClanKey.put(id, clanKey);
             }
         }
+
         for (int id = 1; id <= 4; id++) {
             int[] segment = getSegmentSlotsById(id);
             int startSlot = segment[0];
@@ -128,6 +130,7 @@ public class GenerateTabList {
                 }
                 continue;
             }
+
             String clanKey = idToClanKey.get(id);
             List<PlayerObject> players = clanPlayersMap.getOrDefault(clanKey, Collections.emptyList());
             String displayName = clan.get().getString(clanKey + ".displayName", clanKey).toUpperCase();
@@ -138,6 +141,7 @@ public class GenerateTabList {
             } catch (IllegalArgumentException e) {
                 color = ChatColor.WHITE;
             }
+
             menager.modifyTablist(p, color + "§l" + displayName, String.valueOf(startSlot), 9999, skinvalue, skinsignature, type);
             menager.modifyTablist(p,
                     ChatColor.GRAY + "Punkty: " + ChatColor.WHITE + "§l" + clan.getPoints(clanKey),
@@ -146,17 +150,20 @@ public class GenerateTabList {
                     skinvalue,
                     skinsignature,
                     type);
+
             int slot = startSlot + 2;
             for (int i = 0; i < players.size() && slot <= endSlot; i++, slot++) {
                 PlayerObject po = players.get(i);
                 menager.modifyTablist(p, po.getName(), String.valueOf(slot), po.getPing(), po.getskin()[0], po.getskin()[1], type);
             }
+
             while (slot <= endSlot) {
                 menager.modifyTablist(p, " ", String.valueOf(slot), 9999, skinvalue, skinsignature, type);
                 slot++;
             }
         }
-        List<String> footerList = tabList.getConfig().getStringList("footer");
+
+        List<String> footerList = superClans.getConfig().getStringList("footer");
         if (footerList != null && !footerList.isEmpty()) {
             String footerRaw = String.join("\n", footerList);
             String footerParsed = PlaceholderAPI.setPlaceholders(p, footerRaw);
