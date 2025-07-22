@@ -1,5 +1,5 @@
 name: SuperClans
-version: ${project.version}
+version: 1.0-SNAPSHOT
 main: pl.noname.superclans.SuperTab
 api-version: 1.16
 depend:
@@ -10,3 +10,6 @@ commands:
     description: Zarządzanie punktami teamów
     aliases: punkty
     permission: superclans.points
+  createclan:
+    permission: superclans.createclan
+    description: tworzy klan

@@ -11,14 +11,20 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import pl.noname.superclans.clan.Clan;
+import pl.noname.superclans.clan.PointCommand;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public final class SuperTab extends JavaPlugin implements Listener {
+public final class SuperClans extends JavaPlugin implements Listener {
+
     private Clan clan;
-    public static SuperTab main;
+    private PointCommand pointCommand;
+    private GenerateTabList generateTabList;
+
+    public static SuperClans main;
+
     public static Plugin getMain() {
         return main;
     }
@@ -31,21 +37,35 @@ public final class SuperTab extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         main = this;
+
+        // Najpierw tworzysz clan bez generateTabList (null)
         clan = new Clan(this);
-        getCommand("points").setExecutor(clan);
-        getCommand("points").setTabCompleter(clan);
+
+        // Teraz tworzysz generateTabList i podajesz clan
+        generateTabList = new GenerateTabList(this, clan);
+
+        // Ustaw generateTabList w clan
+        pointCommand = new PointCommand(clan);
+
+        getCommand("points").setExecutor(pointCommand);
+        getCommand("createclan").setExecutor(clan);
+
         saveDefaultConfig();
-        trueping = getConfig().getBoolean("trueping");
+
+        trueping = getConfig().getBoolean("trueping", false);
+
         Bukkit.getPluginManager().registerEvents(this, this);
+
         try {
             clan.setup();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
     @Override
     public void onDisable() {
+        // Nic nie trzeba robić
     }
 
     @EventHandler
@@ -60,7 +80,7 @@ public final class SuperTab extends JavaPlugin implements Listener {
             yamlFile.set("users", YamlUsers);
             yamlFile.save(f);
         }
-        GenerateTabList generateTabList = new GenerateTabList(this, clan);
+
         generateTabList.gen(p, trueping, skinvalue, skinsignature, PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
 
         new BukkitRunnable() {
