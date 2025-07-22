@@ -1,7 +1,6 @@
-package pl.wolny.jungletablist;
+package pl.noname.superclans;
 
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 public class PlayerObject{
     private double hajs;

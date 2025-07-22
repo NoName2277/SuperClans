@@ -1,4 +1,12 @@
-name: JungleTabList
+name: SuperClans
 version: ${project.version}
-main: pl.wolny.jungletablist.JungleTabList
+main: pl.noname.superclans.SuperTab
 api-version: 1.16
+depend:
+  - Vault
+  - PlaceholderAPI
+commands:
+  points:
+    description: Zarządzanie punktami teamów
+    aliases: punkty
+    permission: superclans.points

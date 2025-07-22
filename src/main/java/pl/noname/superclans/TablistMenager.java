@@ -1,4 +1,4 @@
-package pl.wolny.jungletablist;
+package pl.noname.superclans;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;

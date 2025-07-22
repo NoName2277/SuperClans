@@ -1,2 +1,6 @@
 brand: "&a&lSERWERNAME"
-trueping: false
+trueping: true
+footer:
+  - " "
+tabname-suffix: " "
+tabname-prefix: ""
