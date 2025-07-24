@@ -1,27 +1,35 @@
 package pl.noname.superclans;
 
+import net.milkbowl.vault.economy.Economy;
 import net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import pl.noname.superclans.clan.Clan;
 import pl.noname.superclans.clan.PointCommand;
+import pl.noname.superclans.clan.Shop;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public final class SuperClans extends JavaPlugin implements Listener {
+public final class SuperClans extends JavaPlugin implements Listener, CommandExecutor {
 
     private Clan clan;
     private PointCommand pointCommand;
     private GenerateTabList generateTabList;
+    private Economy econ;
+    private Shop shop;
 
     public static SuperClans main;
 
@@ -36,36 +44,32 @@ public final class SuperClans extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        if(!setupEconomy()){
+            getServer().getPluginManager().disablePlugin(this);
+            getLogger().warning("Brakuje ekonomi!!!");
+        }
         main = this;
-
-        // Najpierw tworzysz clan bez generateTabList (null)
         clan = new Clan(this);
-
-        // Teraz tworzysz generateTabList i podajesz clan
         generateTabList = new GenerateTabList(this, clan);
-
-        // Ustaw generateTabList w clan
         pointCommand = new PointCommand(clan);
-
+        shop = new Shop(this, clan);
         getCommand("points").setExecutor(pointCommand);
+        getCommand("points").setTabCompleter(pointCommand);
         getCommand("createclan").setExecutor(clan);
-
+        getCommand("reloadShop").setExecutor(this);
+        getCommand("shop").setExecutor(shop);
         saveDefaultConfig();
-
         trueping = getConfig().getBoolean("trueping", false);
-
         Bukkit.getPluginManager().registerEvents(this, this);
-
+        Bukkit.getPluginManager().registerEvents(shop, this);
         try {
             clan.setup();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
     @Override
     public void onDisable() {
-        // Nic nie trzeba robić
     }
 
     @EventHandler
@@ -80,14 +84,34 @@ public final class SuperClans extends JavaPlugin implements Listener {
             yamlFile.set("users", YamlUsers);
             yamlFile.save(f);
         }
-
         generateTabList.gen(p, trueping, skinvalue, skinsignature, PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
-
         new BukkitRunnable() {
             @Override
             public void run() {
                 generateTabList.gen(p, trueping, skinvalue, skinsignature, PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME);
             }
         }.runTaskTimerAsynchronously(this, 100, 100);
+    }
+
+    public Economy getEconomy(){
+        return econ;
+    }
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        econ = rsp.getProvider();
+        return econ != null;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        reloadConfig();
+        sender.sendMessage("§aPomyślnie przeładowano sklepy!");
+        return false;
     }
 }
