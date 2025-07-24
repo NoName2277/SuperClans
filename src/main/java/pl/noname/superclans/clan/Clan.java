@@ -169,7 +169,6 @@ public class Clan implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!label.equalsIgnoreCase("createclan")) return false;
         String name = args[0].toLowerCase();
         String colorName = args[1].toUpperCase();
         ChatColor color;
@@ -195,6 +194,11 @@ public class Clan implements CommandExecutor, TabCompleter {
             return kolory.stream()
                     .filter(c -> c.toLowerCase().startsWith(args[1].toLowerCase()))
                     .collect(Collectors.toList());
+        }
+        if(args.length == 1){
+            ArrayList<String> name = new ArrayList<>();
+            name.add("[nazwa]");
+            return name;
         }
         return Collections.emptyList();
     }
@@ -234,13 +238,5 @@ public class Clan implements CommandExecutor, TabCompleter {
             clanNames.add(key.substring(4));
         }
         return clanNames;
-    }
-
-    public double getGreenTeamBalance() {
-        return Bukkit.getOnlinePlayers().stream()
-                .filter(p -> p.getScoreboard().getEntryTeam(p.getName()) != null)
-                .filter(p -> p.getScoreboard().getEntryTeam(p.getName()).getName().equals("tab_zieloni"))
-                .mapToDouble(p -> plugin.getEconomy().getBalance(p))
-                .sum();
     }
 }

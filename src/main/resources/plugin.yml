@@ -13,3 +13,5 @@ commands:
   createclan:
     permission: superclans.createclan
     description: tworzy klan
+    aliases: stworzklan
+
