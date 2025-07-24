@@ -2,6 +2,7 @@ package pl.noname.superclans.clan;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -110,8 +111,41 @@ public class Clan implements CommandExecutor, TabCompleter {
     }
 
     public int getPoints(String clanName) {
-        return get().getInt("tab_" + clanName.toLowerCase() + ".points");
+        String key = clanName.toLowerCase() + ".points";
+        if (!get().contains(key)) {
+            return 0;
+        }
+        return get().getInt(key);
     }
+    public double getTeamBalance(String id) {
+        if (id == null) return 0.0;
+
+        if (plugin == null) {
+            return 0.0;
+        }
+
+        if (plugin.getEconomy() == null) {
+            return 0.0;
+        }
+
+        String teamKey = id.toLowerCase();
+        double total = 0.0;
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Team team = player.getScoreboard().getEntryTeam(player.getName());
+            if (team == null) continue;
+
+            if (team.getName() != null && team.getName().equalsIgnoreCase(teamKey)) {
+                total += plugin.getEconomy().getBalance(player);
+            }
+        }
+
+        return total;
+    }
+
+
+
+
 
     public void setPoints(String clanName, int amount) {
         get().set("tab_" + clanName.toLowerCase() + ".points", amount);
@@ -194,5 +228,19 @@ public class Clan implements CommandExecutor, TabCompleter {
         refreshAllTablists();
     }
 
+    public List<String> getClanNames(){
+        List<String> clanNames = new ArrayList<>();
+        for (String key : clanConfig.getKeys(false)){
+            clanNames.add(key.substring(4));
+        }
+        return clanNames;
+    }
 
+    public double getGreenTeamBalance() {
+        return Bukkit.getOnlinePlayers().stream()
+                .filter(p -> p.getScoreboard().getEntryTeam(p.getName()) != null)
+                .filter(p -> p.getScoreboard().getEntryTeam(p.getName()).getName().equals("tab_zieloni"))
+                .mapToDouble(p -> plugin.getEconomy().getBalance(p))
+                .sum();
+    }
 }
