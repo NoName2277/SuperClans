@@ -1,5 +1,6 @@
 package pl.noname.superclans;
 
+import net.milkbowl.vault.economy.Economy;
 import net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -8,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import pl.noname.superclans.clan.Clan;
@@ -22,6 +24,7 @@ public final class SuperClans extends JavaPlugin implements Listener {
     private Clan clan;
     private PointCommand pointCommand;
     private GenerateTabList generateTabList;
+    private Economy econ;
 
     public static SuperClans main;
 
@@ -36,24 +39,19 @@ public final class SuperClans extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        if(!setupEconomy()){
+            getServer().getPluginManager().disablePlugin(this);
+            getLogger().warning("Brakuje ekonomi!!!");
+        }
         main = this;
-
-        // Najpierw tworzysz clan bez generateTabList (null)
         clan = new Clan(this);
-
-        // Teraz tworzysz generateTabList i podajesz clan
         generateTabList = new GenerateTabList(this, clan);
-
-        // Ustaw generateTabList w clan
         pointCommand = new PointCommand(clan);
-
         getCommand("points").setExecutor(pointCommand);
+        getCommand("points").setTabCompleter(pointCommand);
         getCommand("createclan").setExecutor(clan);
-
         saveDefaultConfig();
-
         trueping = getConfig().getBoolean("trueping", false);
-
         Bukkit.getPluginManager().registerEvents(this, this);
 
         try {
@@ -65,7 +63,6 @@ public final class SuperClans extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        // Nic nie trzeba robić
     }
 
     @EventHandler
@@ -80,9 +77,7 @@ public final class SuperClans extends JavaPlugin implements Listener {
             yamlFile.set("users", YamlUsers);
             yamlFile.save(f);
         }
-
         generateTabList.gen(p, trueping, skinvalue, skinsignature, PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
-
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -90,4 +85,20 @@ public final class SuperClans extends JavaPlugin implements Listener {
             }
         }.runTaskTimerAsynchronously(this, 100, 100);
     }
+
+    public Economy getEconomy(){
+        return econ;
+    }
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        econ = rsp.getProvider();
+        return econ != null;
+    }
+
 }

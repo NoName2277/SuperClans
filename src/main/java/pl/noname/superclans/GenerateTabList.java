@@ -126,7 +126,7 @@ public class GenerateTabList {
 
             if (!idToClanKey.containsKey(id)) {
                 for (int slot = startSlot; slot <= endSlot; slot++) {
-                    menager.modifyTablist(p, "                   .", String.valueOf(slot), 9999, skinvalue, skinsignature, type);
+                    menager.modifyTablist(p, "                    ", String.valueOf(slot), 9999, skinvalue, skinsignature, type);
                 }
                 continue;
             }
@@ -143,15 +143,11 @@ public class GenerateTabList {
             }
 
             menager.modifyTablist(p, color + "§l" + displayName, String.valueOf(startSlot), 9999, skinvalue, skinsignature, type);
-            menager.modifyTablist(p,
-                    ChatColor.GRAY + "Punkty: " + ChatColor.WHITE + "§l" + clan.getPoints(clanKey),
-                    String.valueOf(startSlot + 1),
-                    9999,
-                    skinvalue,
-                    skinsignature,
-                    type);
+            menager.modifyTablist(p, "§7Punkty: §3" + clan.getPoints(clanKey), String.valueOf(startSlot + 1), 9999, skinvalue, skinsignature, type);
+            menager.modifyTablist(p, "§7Saldo: §3" + clan.getTeamBalance(clanKey), String.valueOf(startSlot + 2), 9999, skinvalue, skinsignature, type);
+            menager.modifyTablist(p, "", String.valueOf(startSlot + 3), 9999, skinvalue, skinsignature, type);
 
-            int slot = startSlot + 2;
+            int slot = startSlot + 4;
             for (int i = 0; i < players.size() && slot <= endSlot; i++, slot++) {
                 PlayerObject po = players.get(i);
                 menager.modifyTablist(p, po.getName(), String.valueOf(slot), po.getPing(), po.getskin()[0], po.getskin()[1], type);
