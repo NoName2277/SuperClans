@@ -4,3 +4,13 @@ footer:
   - " "
 tabname-suffix: " "
 tabname-prefix: ""
+shop:
+  items:
+    potato:
+      material: POTATO
+      display-name: '&6Ziemniaki'
+      sell:
+        require: 64
+        points: 1
+      buy:
+        price: 0

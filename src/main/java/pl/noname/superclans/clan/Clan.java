@@ -117,6 +117,13 @@ public class Clan implements CommandExecutor, TabCompleter {
         }
         return get().getInt(key);
     }
+    public int getPointsName(String clanName) {
+        String key = "tab_" + clanName.toLowerCase() + ".points";
+        if (!get().contains(key)) {
+            return 0;
+        }
+        return get().getInt(key);
+    }
     public double getTeamBalance(String id) {
         if (id == null) return 0.0;
 
@@ -153,11 +160,11 @@ public class Clan implements CommandExecutor, TabCompleter {
     }
 
     public void addPoints(String clanName, int amount) {
-        setPoints(clanName, getPoints(clanName) + amount);
+        setPoints(clanName, getPointsName(clanName) + amount);
     }
 
     public void removePoints(String clanName, int amount) {
-        setPoints(clanName, getPoints(clanName) - amount);
+        setPoints(clanName, getPointsName(clanName) - amount);
     }
 
     private void refreshAllTablists() {

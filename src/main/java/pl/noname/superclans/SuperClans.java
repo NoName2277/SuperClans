@@ -3,6 +3,9 @@ package pl.noname.superclans;
 import net.milkbowl.vault.economy.Economy;
 import net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,17 +17,19 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import pl.noname.superclans.clan.Clan;
 import pl.noname.superclans.clan.PointCommand;
+import pl.noname.superclans.clan.Shop;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public final class SuperClans extends JavaPlugin implements Listener {
+public final class SuperClans extends JavaPlugin implements Listener, CommandExecutor {
 
     private Clan clan;
     private PointCommand pointCommand;
     private GenerateTabList generateTabList;
     private Economy econ;
+    private Shop shop;
 
     public static SuperClans main;
 
@@ -47,20 +52,22 @@ public final class SuperClans extends JavaPlugin implements Listener {
         clan = new Clan(this);
         generateTabList = new GenerateTabList(this, clan);
         pointCommand = new PointCommand(clan);
+        shop = new Shop(this, clan);
         getCommand("points").setExecutor(pointCommand);
         getCommand("points").setTabCompleter(pointCommand);
         getCommand("createclan").setExecutor(clan);
+        getCommand("reloadShop").setExecutor(this);
+        getCommand("shop").setExecutor(shop);
         saveDefaultConfig();
         trueping = getConfig().getBoolean("trueping", false);
         Bukkit.getPluginManager().registerEvents(this, this);
-
+        Bukkit.getPluginManager().registerEvents(shop, this);
         try {
             clan.setup();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
     @Override
     public void onDisable() {
     }
@@ -101,4 +108,10 @@ public final class SuperClans extends JavaPlugin implements Listener {
         return econ != null;
     }
 
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        reloadConfig();
+        sender.sendMessage("§aPomyślnie przeładowano sklepy!");
+        return false;
+    }
 }
