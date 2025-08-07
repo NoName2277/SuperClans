@@ -246,4 +246,13 @@ public class Clan implements CommandExecutor, TabCompleter {
         }
         return clanNames;
     }
+
+    public String getTeamName(Player player) {
+        Scoreboard scoreboard = player.getScoreboard();
+        Team team = scoreboard.getEntryTeam(player.getName());
+        if (team != null && team.getName().startsWith("tab_")) {
+            return team.getName();
+        }
+        return null;
+    }
 }

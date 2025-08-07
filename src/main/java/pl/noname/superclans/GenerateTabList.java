@@ -93,10 +93,8 @@ public class GenerateTabList {
                 int ping = trueping ? ((CraftPlayer) target).getHandle().ping : 9999;
 
                 String nick = "§a" + target.getName();
-                String rawPrefix = superClans.getConfig().getString("tabname-prefix", "");
-                String rawSuffix = superClans.getConfig().getString("tabname-suffix", "");
-                String prefix = PlaceholderAPI.setPlaceholders(target, rawPrefix);
-                String suffix = PlaceholderAPI.setPlaceholders(target, rawSuffix);
+                String prefix = PlaceholderAPI.setPlaceholders(target, superClans.getConfig().getString("tabname-prefix", ""));
+                String suffix = PlaceholderAPI.setPlaceholders(target, superClans.getConfig().getString("tabname-suffix", ""));
                 prefix = ChatColor.translateAlternateColorCodes('&', prefix);
                 suffix = ChatColor.translateAlternateColorCodes('&', suffix);
 
@@ -165,6 +163,7 @@ public class GenerateTabList {
             String footerParsed = PlaceholderAPI.setPlaceholders(p, footerRaw);
             footerParsed = ChatColor.translateAlternateColorCodes('&', footerParsed);
             p.setPlayerListFooter(footerParsed);
+            p.setPlayerListHeader(ChatColor.translateAlternateColorCodes('&', superClans.getConfig().getString("brand")));
         }
     }
 }

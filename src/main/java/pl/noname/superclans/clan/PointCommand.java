@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class PointCommand implements CommandExecutor, TabCompleter {
