@@ -21,7 +21,7 @@ public class PointCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if (args.length != 3) {
-            sender.sendMessage(ChatColor.RED + "Użycie: /points <klan> <dodaj/usuń/ustaw> <liczba>");
+            sender.sendMessage(ChatColor.RED + "Użycie: /points <klan> <dodaj/usuń/ustaw> <liczba> ");
             return true;
         }
 
