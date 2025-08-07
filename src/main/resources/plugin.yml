@@ -13,3 +13,11 @@ commands:
   createclan:
     permission: superclans.createclan
     description: tworzy klan
+    aliases: stworzklan
+  pointshop:
+    aliases: sklep
+    description: otwiera sklep z punktami
+  reloadShop:
+    permission: superclans.reload
+    description: Przeładowywuje config
+

@@ -7,11 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-public class PointCommand implements CommandExecutor {
+public class PointCommand implements CommandExecutor, TabCompleter {
 
     private final Clan clan;
 
@@ -23,7 +21,7 @@ public class PointCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if (args.length != 3) {
-            sender.sendMessage(ChatColor.RED + "Użycie: /points <klan> <dodaj/usuń/ustaw> <liczba>");
+            sender.sendMessage(ChatColor.RED + "Użycie: /points <klan> <dodaj/usuń/ustaw> <liczba> ");
             return true;
         }
 
@@ -64,4 +62,21 @@ public class PointCommand implements CommandExecutor {
         return true;
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
+        if(args.length==2){
+            ArrayList<String> action = new ArrayList<>();
+            action.add("dodaj");
+            action.add("usuń");
+            action.add("ustaw");
+            return action;
+        } else if (args.length==1) {
+            return clan.getClanNames();
+        } else if (args.length==3) {
+            ArrayList<String> amount = new ArrayList<>();
+            amount.add("[ilość]");
+            return amount;
+        }
+        return null;
+    }
 }

@@ -2,6 +2,7 @@ package pl.noname.superclans.clan;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -110,8 +111,48 @@ public class Clan implements CommandExecutor, TabCompleter {
     }
 
     public int getPoints(String clanName) {
-        return get().getInt("tab_" + clanName.toLowerCase() + ".points");
+        String key = clanName.toLowerCase() + ".points";
+        if (!get().contains(key)) {
+            return 0;
+        }
+        return get().getInt(key);
     }
+    public int getPointsName(String clanName) {
+        String key = "tab_" + clanName.toLowerCase() + ".points";
+        if (!get().contains(key)) {
+            return 0;
+        }
+        return get().getInt(key);
+    }
+    public double getTeamBalance(String id) {
+        if (id == null) return 0.0;
+
+        if (plugin == null) {
+            return 0.0;
+        }
+
+        if (plugin.getEconomy() == null) {
+            return 0.0;
+        }
+
+        String teamKey = id.toLowerCase();
+        double total = 0.0;
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Team team = player.getScoreboard().getEntryTeam(player.getName());
+            if (team == null) continue;
+
+            if (team.getName() != null && team.getName().equalsIgnoreCase(teamKey)) {
+                total += plugin.getEconomy().getBalance(player);
+            }
+        }
+
+        return total;
+    }
+
+
+
+
 
     public void setPoints(String clanName, int amount) {
         get().set("tab_" + clanName.toLowerCase() + ".points", amount);
@@ -119,11 +160,11 @@ public class Clan implements CommandExecutor, TabCompleter {
     }
 
     public void addPoints(String clanName, int amount) {
-        setPoints(clanName, getPoints(clanName) + amount);
+        setPoints(clanName, getPointsName(clanName) + amount);
     }
 
     public void removePoints(String clanName, int amount) {
-        setPoints(clanName, getPoints(clanName) - amount);
+        setPoints(clanName, getPointsName(clanName) - amount);
     }
 
     private void refreshAllTablists() {
@@ -135,7 +176,6 @@ public class Clan implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!label.equalsIgnoreCase("createclan")) return false;
         String name = args[0].toLowerCase();
         String colorName = args[1].toUpperCase();
         ChatColor color;
@@ -161,6 +201,11 @@ public class Clan implements CommandExecutor, TabCompleter {
             return kolory.stream()
                     .filter(c -> c.toLowerCase().startsWith(args[1].toLowerCase()))
                     .collect(Collectors.toList());
+        }
+        if(args.length == 1){
+            ArrayList<String> name = new ArrayList<>();
+            name.add("[nazwa]");
+            return name;
         }
         return Collections.emptyList();
     }
@@ -194,5 +239,20 @@ public class Clan implements CommandExecutor, TabCompleter {
         refreshAllTablists();
     }
 
+    public List<String> getClanNames(){
+        List<String> clanNames = new ArrayList<>();
+        for (String key : clanConfig.getKeys(false)){
+            clanNames.add(key.substring(4));
+        }
+        return clanNames;
+    }
 
+    public String getTeamName(Player player) {
+        Scoreboard scoreboard = player.getScoreboard();
+        Team team = scoreboard.getEntryTeam(player.getName());
+        if (team != null && team.getName().startsWith("tab_")) {
+            return team.getName();
+        }
+        return null;
+    }
 }
